@@ -199,11 +199,29 @@ const Editor = {
             ${FONTS.map(f => `<option value="${f.value}" style="font-family:${f.value}">${f.name}</option>`).join('')}
           </select></div>
           <div class="prop-row"><span class="prop-label">旋转</span><input class="prop-input" type="number" id="prop-rotation" value="${el.rotation||0}" min="-180" max="180" /></div>
+          <div class="prop-row"><span class="prop-label">动画</span><select class="prop-input" id="prop-anim">
+            <option value="">无</option>
+            <option value="fadeIn" ${el.anim==='fadeIn'?'selected':''}>淡入</option>
+            <option value="slideUp" ${el.anim==='slideUp'?'selected':''}>上滑</option>
+            <option value="slideLeft" ${el.anim==='slideLeft'?'selected':''}>左滑</option>
+            <option value="slideRight" ${el.anim==='slideRight'?'selected':''}>右滑</option>
+            <option value="zoomIn" ${el.anim==='zoomIn'?'selected':''}>缩放</option>
+            <option value="bounce" ${el.anim==='bounce'?'selected':''}>弹跳</option>
+          </select></div>
         `;
       } else if (el.type === 'sticker') {
         html += `
           <div class="prop-row"><span class="prop-label">大小</span><input class="prop-input" type="number" id="prop-fontSize" value="${el.fontSize||40}" min="16" max="120" /></div>
           <div class="prop-row"><span class="prop-label">旋转</span><input class="prop-input" type="number" id="prop-rotation" value="${el.rotation||0}" min="-180" max="180" /></div>
+          <div class="prop-row"><span class="prop-label">动画</span><select class="prop-input" id="prop-anim">
+            <option value="">无</option>
+            <option value="fadeIn" ${el.anim==='fadeIn'?'selected':''}>淡入</option>
+            <option value="slideUp" ${el.anim==='slideUp'?'selected':''}>上滑</option>
+            <option value="slideLeft" ${el.anim==='slideLeft'?'selected':''}>左滑</option>
+            <option value="slideRight" ${el.anim==='slideRight'?'selected':''}>右滑</option>
+            <option value="zoomIn" ${el.anim==='zoomIn'?'selected':''}>缩放</option>
+            <option value="bounce" ${el.anim==='bounce'?'selected':''}>弹跳</option>
+          </select></div>
         `;
       }
       html += `<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:4px">
@@ -245,6 +263,8 @@ const Editor = {
       if ($col) $col.onchange = () => { el.color = $col.value; this.save(); this.renderCanvas(page); };
       if ($font) { $font.value = el.fontFamily; $font.onchange = () => { el.fontFamily = $font.value; this.save(); this.renderCanvas(page); }; }
       if ($rot) $rot.onchange = () => { el.rotation = +$rot.value; this.save(); this.renderCanvas(page); };
+      const $anim = document.getElementById('prop-anim');
+      if ($anim) { $anim.onchange = () => { el.anim = $anim.value || undefined; this.save(); }; }
       if ($del) $del.onclick = () => { this.deleteElement(el.id); };
       const $fw=document.getElementById('prop-forward'),
             $bw=document.getElementById('prop-backward'),

@@ -84,8 +84,27 @@ const Viewer = {
       if (e.key === 'Escape') App.go('library');
     };
 
+    // 注入动画CSS
+    this.injectAnimCSS();
+
     // 音频播放器
     this.renderAudio();
+  },
+
+  injectAnimCSS() {
+    if (document.getElementById('anim-css')) return;
+    const s = document.createElement('style'); s.id = 'anim-css';
+    s.textContent = `
+      @keyframes el-fadeIn { from{opacity:0} to{opacity:1} }
+      @keyframes el-slideUp { from{opacity:0;transform:translateY(40px)} to{opacity:1;transform:translateY(0)} }
+      @keyframes el-slideLeft { from{opacity:0;transform:translateX(-40px)} to{opacity:1;transform:translateX(0)} }
+      @keyframes el-slideRight { from{opacity:0;transform:translateX(40px)} to{opacity:1;transform:translateX(0)} }
+      @keyframes el-zoomIn { from{opacity:0;transform:scale(0.3)} to{opacity:1;transform:scale(1)} }
+      @keyframes el-bounce { 0%{opacity:0;transform:scale(0.3)} 50%{transform:scale(1.15)} 70%{transform:scale(0.9)} 100%{opacity:1;transform:scale(1)} }
+      .anim-trigger { animation-duration: 0.6s; animation-fill-mode: both; animation-play-state: paused; }
+      .anim-trigger.anim-run { animation-play-state: running; }
+    `;
+    document.head.appendChild(s);
   },
 
   /** 音频播放器 */
@@ -146,6 +165,97 @@ const Viewer = {
     if (this.audioEl) { this.audioEl.pause(); this.audioEl = null; }
   },
 
+  /** 导出当前页为PNG */
+  async exportPNG() {
+    // 找当前可见页
+    const bp = this.book.pages;
+    const visibleIdx = this.currentPage * 2; // 当前左侧页
+    const page = bp[visibleIdx];
+    if (!page) { App.toast('没有可导出的页面', true); return; }
+
+    const W = 1080, H = 1440;
+    const canvas = document.createElement('canvas');
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+
+    // 背景
+    const theme = THEMES[page.theme] || THEMES.moon;
+    const bgStr = page.bgOverride || theme.bg;
+    const grad = this._parseGradient(ctx, bgStr, W, H);
+    ctx.fillStyle = grad || theme.textColor || '#12121A';
+    ctx.fillRect(0, 0, W, H);
+
+    // 装订线
+    const bindingGrad = ctx.createLinearGradient(0, 0, 20, 0);
+    bindingGrad.addColorStop(0, 'rgba(0,0,0,0.3)'); bindingGrad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = bindingGrad; ctx.fillRect(0, 0, 20, H);
+
+    // 加载字体
+    await document.fonts.ready;
+
+    // 绘制元素
+    for (const el of page.elements) {
+      const x = el.x / 100 * W, y = el.y / 100 * H;
+      ctx.save();
+      if (el.rotation) { ctx.translate(x, y); ctx.rotate(el.rotation * Math.PI / 180); ctx.translate(-x, -y); }
+
+      if (el.type === 'text') {
+        const fs = el.fontSize * (W / 440);
+        ctx.font = `${fs}px ${el.fontFamily || 'serif'}`;
+        ctx.fillStyle = el.color;
+        ctx.textAlign = 'center';
+        const lines = String(el.content).split('\n');
+        lines.forEach((line, i) => ctx.fillText(line, x, y + i * fs * 1.5));
+      } else if (el.type === 'sticker') {
+        const fs = (el.fontSize || 40) * (W / 440);
+        if (el.content?.startsWith('data:')) {
+          await new Promise(resolve => {
+            const img = new Image(); img.onload = () => { ctx.drawImage(img, x - fs/2, y - fs/2, fs, fs); resolve(); };
+            img.onerror = resolve; img.src = el.content;
+          });
+        } else {
+          ctx.font = `${fs}px serif`; ctx.textAlign = 'center'; ctx.fillText(el.content, x, y + fs*0.3);
+        }
+      } else if (el.type === 'image') {
+        await new Promise(resolve => {
+          const img = new Image(); img.onload = () => { ctx.drawImage(img, x, y, el.width * W/440, el.height * H/580); resolve(); };
+          img.onerror = resolve; img.src = el.src;
+        });
+      }
+      ctx.restore();
+    }
+
+    // 纸张纹理
+    ctx.fillStyle = 'rgba(0,0,0,0.03)';
+    for (let py = 0; py < H; py += 8) ctx.fillRect(0, py, W, 1);
+    for (let px = 0; px < W; px += 8) ctx.fillRect(px, 0, 1, H);
+
+    // 下载
+    canvas.toBlob(blob => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = (this.book.title || 'page') + `.png`;
+      a.click(); URL.revokeObjectURL(a.href);
+      App.toast('图片已下载 (1080×1440)');
+    }, 'image/png');
+  },
+
+  _parseGradient(ctx, str, w, h) {
+    if (!str) return null;
+    if (!str.includes('gradient')) { ctx.fillStyle = str; return str; }
+    try {
+      const match = str.match(/linear-gradient\((\d+)deg,\s*(.+?),\s*(.+?)\)/);
+      if (!match) return null;
+      const angle = +match[1], c1 = match[2].trim(), c2 = match[3].trim();
+      const rad = angle * Math.PI / 180;
+      const x1 = w/2 - Math.cos(rad) * w, y1 = h/2 - Math.sin(rad) * h;
+      const x2 = w/2 + Math.cos(rad) * w, y2 = h/2 + Math.sin(rad) * h;
+      const grad = ctx.createLinearGradient(x1, y1, x2, y2);
+      grad.addColorStop(0, c1); grad.addColorStop(1, c2);
+      return grad;
+    } catch(e) { return null; }
+  },
+
   pageBG(page) {
     if (!page) return '';
     const theme = THEMES[page.theme] || THEMES.moon;
@@ -159,13 +269,14 @@ const Viewer = {
     if (theme.decoHtml) html += theme.decoHtml;
 
     page.elements.forEach(el => {
+      const animClass = el.anim ? `anim-trigger el-${el.anim}` : '';
       if (el.type === 'text') {
-        html += `<div class="viewer-element text-el" style="left:${el.x}%;top:${el.y}%;font-size:${el.fontSize}px;color:${el.color};font-family:${el.fontFamily};transform:rotate(${el.rotation||0}deg);z-index:${el.zIndex||1}">${this.escHtml(el.content)}</div>`;
+        html += `<div class="viewer-element text-el ${animClass}" style="left:${el.x}%;top:${el.y}%;font-size:${el.fontSize}px;color:${el.color};font-family:${el.fontFamily};transform:rotate(${el.rotation||0}deg);z-index:${el.zIndex||1}" data-anim="${el.anim||''}">${this.escHtml(el.content)}</div>`;
       } else if (el.type === 'sticker') {
         const isDataUrl = el.content?.startsWith('data:');
-        html += `<div class="viewer-element sticker-el" style="left:${el.x}%;top:${el.y}%;font-size:${el.fontSize||40}px;transform:rotate(${el.rotation||0}deg);z-index:${el.zIndex||1}">${isDataUrl ? `<img src="${el.content}" style="max-width:120px;max-height:120px;object-fit:contain" />` : el.content}</div>`;
+        html += `<div class="viewer-element sticker-el ${animClass}" style="left:${el.x}%;top:${el.y}%;font-size:${el.fontSize||40}px;transform:rotate(${el.rotation||0}deg);z-index:${el.zIndex||1}" data-anim="${el.anim||''}">${isDataUrl ? `<img src="${el.content}" style="max-width:120px;max-height:120px;object-fit:contain" />` : el.content}</div>`;
       } else if (el.type === 'image') {
-        html += `<div class="viewer-element" style="left:${el.x}%;top:${el.y}%;width:${el.width}px;height:${el.height}px;transform:rotate(${el.rotation||0}deg);z-index:${el.zIndex||1}"><img src="${el.src}" style="width:100%;height:100%;object-fit:contain" /></div>`;
+        html += `<div class="viewer-element ${animClass}" style="left:${el.x}%;top:${el.y}%;width:${el.width}px;height:${el.height}px;transform:rotate(${el.rotation||0}deg);z-index:${el.zIndex||1}" data-anim="${el.anim||''}"><img src="${el.src}" style="width:100%;height:100%;object-fit:contain" /></div>`;
       }
     });
     return html;
@@ -186,6 +297,7 @@ const Viewer = {
       if (page) page.classList.add('flipped');
       this.currentPage++;
       this.renderProgress();
+      this.triggerPageAnims();
     }
   },
 
@@ -195,7 +307,31 @@ const Viewer = {
       const page = document.querySelector(`.viewer-page[data-vp="${this.currentPage}"]`);
       if (page) page.classList.remove('flipped');
       this.renderProgress();
+      this.triggerPageAnims();
     }
+  },
+
+  triggerPageAnims() {
+    setTimeout(() => {
+      const bp = this.book.pages;
+      // 当前可见的左页
+      const leftIdx = this.currentPage * 2;
+      const rightIdx = leftIdx + 1;
+      [leftIdx, rightIdx].forEach(idx => {
+        if (idx >= bp.length) return;
+        const page = bp[idx];
+        if (!page) return;
+        const allEls = document.querySelectorAll(`.viewer-page-front[style*="${page.theme}"] .anim-trigger, .viewer-page-back[style*="${page.theme}"] .anim-trigger`);
+        // fallback: find any anim-trigger that wasn't run yet
+        const untriggered = document.querySelectorAll('.anim-trigger:not(.anim-run)');
+        untriggered.forEach((el, i) => {
+          setTimeout(() => {
+            el.classList.add('anim-run');
+            el.style.animationName = el.dataset.anim ? `el-${el.dataset.anim}` : '';
+          }, i * 120);
+        });
+      });
+    }, 400); // 等翻页动画到一半时触发
   },
 
   reset() {
