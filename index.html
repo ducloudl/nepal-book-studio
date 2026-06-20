@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>尼泊尔手工本工作室</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ======== 书架视图 ======== -->
+<div id="view-library">
+  <div class="library-header">
+    <h1>📔 尼泊尔手工本工作室</h1>
+    <p>制作你独一无二的数字手工本，分享给心爱的人</p>
+  </div>
+  <div class="library-actions" id="library-actions"></div>
+  <div class="books-grid" id="books-grid"></div>
+</div>
+
+<!-- ======== 编辑器视图 ======== -->
+<div id="view-editor" class="hide">
+  <!-- 左侧页面列表 -->
+  <div class="editor-sidebar">
+    <div class="sidebar-header">
+      <h3>页面</h3>
+      <button class="btn btn-sm" onclick="Editor.addPage()">+</button>
+    </div>
+    <div class="sidebar-pages" id="sidebar-pages"></div>
+  </div>
+  <!-- 中心画布区域 -->
+  <div class="editor-canvas-area">
+    <div class="editor-toolbar" id="editor-toolbar"></div>
+    <div class="editor-canvas-wrapper">
+      <div class="editor-canvas" id="editor-canvas"></div>
+    </div>
+  </div>
+  <!-- 右侧属性面板 -->
+  <div class="editor-props" id="editor-props"></div>
+</div>
+
+<!-- ======== 预览器视图 ======== -->
+<div id="view-viewer" class="hide">
+  <div class="viewer-bg-stars" id="viewer-stars"></div>
+  <div class="viewer-header">
+    <div class="viewer-title" id="viewer-title" style="cursor:pointer">手工本标题</div>
+    <div class="viewer-actions">
+      <button class="btn btn-sm" onclick="Viewer.share()">📤 分享</button>
+      <button class="btn btn-sm" onclick="Viewer.fullscreen()">⛶ 全屏</button>
+      <button class="btn btn-sm" onclick="Viewer.reset()">↺ 重看</button>
+      <button class="btn btn-sm" onclick="App.go('library')">✕ 退出</button>
+    </div>
+  </div>
+  <div class="viewer-book-wrap">
+    <div class="viewer-book" id="viewer-book"></div>
+  </div>
+  <div class="viewer-progress" id="viewer-progress"></div>
+  <div class="viewer-nav">
+    <button class="btn" onclick="Viewer.prevPage()">◀ 上一页</button>
+    <button class="btn" onclick="Viewer.nextPage()">下一页 ▶</button>
+  </div>
+  <div class="viewer-hint">点击翻页 / 方向键 / ESC退出</div>
+</div>
+
+<!-- JS -->
+<script src="js/themes.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/editor.js"></script>
+<script src="js/viewer.js"></script>
+<script src="js/app.js"></script>
+<script>
+  App.init();
+</script>
+</body>
+</html>
