@@ -136,15 +136,71 @@ const FONTS = [
 /** 默认模板 */
 const TEMPLATES = {
   love: {
-    title: '致最爱的你',
-    subtitle: '— handmade with love —',
-    coverTheme: 'cover',
+    title: '致最爱的你', subtitle: '— handmade with love —', coverTheme: 'cover',
     pages: [
       { theme: 'moon', elements: [{ type:'text', content:'我的月亮\n永悬不落', x:35, y:40, fontSize:24, color:'#FFF8E1', fontFamily:"'Ma Shan Zheng', serif" }] },
       { theme: 'rose', elements: [{ type:'text', content:'今天的玫瑰\n是爱你的形状', x:35, y:40, fontSize:22, color:'#FFC0CB', fontFamily:"'Ma Shan Zheng', serif" }] },
       { theme: 'firework', elements: [{ type:'text', content:'雨是神明的烟花\n而你是我的奇迹', x:30, y:40, fontSize:22, color:'#FFD700', fontFamily:"'Ma Shan Zheng', serif" }] },
       { theme: 'sun', elements: [{ type:'text', content:'太阳 一直在\n我也是', x:35, y:55, fontSize:24, color:'#FFF3E0', fontFamily:"'Ma Shan Zheng', serif" }] },
       { theme: 'ending', elements: [{ type:'text', content:'人生是旷野 不是轨道\n夏天周而复始\n相见自会有时', x:25, y:35, fontSize:20, color:'#FFF8E1', fontFamily:"'Ma Shan Zheng', serif" }] },
+    ]
+  },
+  friendship: {
+    title: '致最好的闺蜜', subtitle: '— 友谊万岁 —', coverTheme: 'flower',
+    pages: [
+      { theme: 'flower', elements: [{ type:'text', content:'最好的时光\n是有你在身边的时光', x:30, y:35, fontSize:22, color:'#4A148C', fontFamily:"'Ma Shan Zheng', serif" }] },
+      { theme: 'sun', elements: [{ type:'text', content:'你是我的太阳\n照亮每一个低谷', x:35, y:50, fontSize:22, color:'#FFF3E0', fontFamily:"'Ma Shan Zheng', serif" }] },
+      { theme: 'cake', elements: [{ type:'text', content:'一起笑过哭过\n这才是闺蜜', x:30, y:40, fontSize:22, color:'#5D4037', fontFamily:"'Ma Shan Zheng', serif" }] },
+      { theme: 'lavender', elements: [{ type:'text', content:'岁月很长\n幸好有你', x:35, y:45, fontSize:24, color:'#F3E8FF', fontFamily:"'Ma Shan Zheng', serif" }] },
+      { theme: 'ending', elements: [{ type:'text', content:'友谊是一杯陈酿的酒\n越久越香\n干杯 我亲爱的闺蜜', x:25, y:35, fontSize:18, color:'#FFF8E1', fontFamily:"'Ma Shan Zheng', serif" }] },
+    ]
+  },
+  gratitude: {
+    title: '感恩有你', subtitle: '— Thank You —', coverTheme: 'forest',
+    pages: [
+      { theme: 'forest', elements: [{ type:'text', content:'感谢你\n出现在我的生命里', x:30, y:40, fontSize:24, color:'#C8E6C9', fontFamily:"'Ma Shan Zheng', serif" }] },
+      { theme: 'sun', elements: [{ type:'text', content:'你的帮助\n是我前行的力量', x:30, y:50, fontSize:22, color:'#FFF3E0', fontFamily:"'Ma Shan Zheng', serif" }] },
+      { theme: 'wave', elements: [{ type:'text', content:'滴水之恩\n涌泉相报', x:30, y:45, fontSize:24, color:'#E1F5FE', fontFamily:"'Ma Shan Zheng', serif" }] },
+      { theme: 'ending', elements: [{ type:'text', content:'世界因你而美好\n愿你的每一天\n都被温柔以待', x:25, y:35, fontSize:20, color:'#FFF8E1', fontFamily:"'Ma Shan Zheng', serif" }] },
+    ]
+  },
+  travel: {
+    title: '旅行记忆', subtitle: '— 在路上 —', coverTheme: 'sunset',
+    pages: [
+      { theme: 'sunset', elements: [{ type:'text', content:'世界那么大\n我们一起去看看', x:30, y:40, fontSize:24, color:'#FFF', fontFamily:"'Ma Shan Zheng', serif" }] },
+      { theme: 'wave', elements: [{ type:'text', content:'大海的声音\n是自由的召唤', x:30, y:45, fontSize:22, color:'#E1F5FE', fontFamily:"'Ma Shan Zheng', serif" }] },
+      { theme: 'forest', elements: [{ type:'text', content:'穿越森林\n遇见更好的自己', x:30, y:40, fontSize:22, color:'#C8E6C9', fontFamily:"'Ma Shan Zheng', serif" }] },
+      { theme: 'moon', elements: [{ type:'text', content:'异乡的月亮\n和家乡的一样圆', x:30, y:40, fontSize:20, color:'#FFF8E1', fontFamily:"'Ma Shan Zheng', serif" }] },
+      { theme: 'ending', elements: [{ type:'text', content:'人生就是一场旅行\n不在乎目的地\n只在乎沿途的风景', x:22, y:35, fontSize:18, color:'#FFF8E1', fontFamily:"'Ma Shan Zheng', serif" }] },
+    ]
+  },
+  birthday: {
+    title: '生日快乐', subtitle: '— Happy Birthday —', coverTheme: 'cake',
+    pages: [
+      { theme: 'cake', elements: [{ type:'text', content:'祝你生日快乐\n不止今天', x:30, y:40, fontSize:24, color:'#5D4037', fontFamily:"'Ma Shan Zheng', serif" }] },
+      { theme: 'sun', elements: [{ type:'text', content:'愿你的每一天\n都像今天一样灿烂', x:25, y:45, fontSize:20, color:'#FFF3E0', fontFamily:"'Ma Shan Zheng', serif" }] },
+      { theme: 'firework', elements: [{ type:'text', content:'烟花为你绽放\n愿你许的愿望都实现', x:25, y:40, fontSize:20, color:'#FFD700', fontFamily:"'Ma Shan Zheng', serif" }] },
+      { theme: 'ending', elements: [{ type:'text', content:'愿你年年有今日\n岁岁有今朝\n生日快乐！', x:30, y:35, fontSize:22, color:'#FFF8E1', fontFamily:"'Ma Shan Zheng', serif" }] },
+    ]
+  },
+  wedding: {
+    title: '婚礼纪念', subtitle: '— 执子之手 —', coverTheme: 'rose',
+    pages: [
+      { theme: 'rose', elements: [{ type:'text', content:'执子之手\n与子偕老', x:32, y:40, fontSize:26, color:'#FFC0CB', fontFamily:"'Ma Shan Zheng', serif" }] },
+      { theme: 'moon', elements: [{ type:'text', content:'愿我如星君如月\n夜夜流光相皎洁', x:25, y:40, fontSize:18, color:'#FFF8E1', fontFamily:"'Ma Shan Zheng', serif" }] },
+      { theme: 'lavender', elements: [{ type:'text', content:'爱是恒久忍耐\n又有恩慈', x:28, y:42, fontSize:20, color:'#F3E8FF', fontFamily:"'Ma Shan Zheng', serif" }] },
+      { theme: 'firework', elements: [{ type:'text', content:'今天全世界\n都在为你们祝福', x:28, y:42, fontSize:22, color:'#FFD700', fontFamily:"'Ma Shan Zheng', serif" }] },
+      { theme: 'ending', elements: [{ type:'text', content:'愿你们的爱情\n像紫藤花一样\n年年盛开 永不凋零', x:25, y:35, fontSize:19, color:'#FFF8E1', fontFamily:"'Ma Shan Zheng', serif" }] },
+    ]
+  },
+  baby: {
+    title: '宝宝成长记', subtitle: '— 记录每一个瞬间 —', coverTheme: 'star',
+    pages: [
+      { theme: 'star', elements: [{ type:'text', content:'你是坠落人间的\n小星星', x:30, y:40, fontSize:24, color:'#E0E0FF', fontFamily:"'Ma Shan Zheng', serif" }] },
+      { theme: 'cake', elements: [{ type:'text', content:'第一次笑\n第一次翻身\n每一次都是奇迹', x:25, y:38, fontSize:18, color:'#5D4037', fontFamily:"'Ma Shan Zheng', serif" }] },
+      { theme: 'sun', elements: [{ type:'text', content:'愿阳光\n永远照在你脸上', x:32, y:48, fontSize:22, color:'#FFF3E0', fontFamily:"'Ma Shan Zheng', serif" }] },
+      { theme: 'flower', elements: [{ type:'text', content:'像花儿一样\n健康快乐地长大', x:28, y:42, fontSize:22, color:'#4A148C', fontFamily:"'Ma Shan Zheng', serif" }] },
+      { theme: 'ending', elements: [{ type:'text', content:'你是爸爸妈妈\n最珍贵的宝贝\n愿你一生平安喜乐', x:25, y:35, fontSize:20, color:'#FFF8E1', fontFamily:"'Ma Shan Zheng', serif" }] },
     ]
   }
 };

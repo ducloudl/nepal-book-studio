@@ -126,8 +126,14 @@ const App = {
     // 顶栏按钮
     const actions = document.getElementById('library-actions');
     actions.innerHTML = `
-      <button class="btn btn-primary" onclick="App.createBook()">✨ 新建手工本</button>
-      <button class="btn" onclick="App.createBookFromTemplate('love')">💕 情侣模板</button>
+      <button class="btn btn-primary" onclick="App.createBook()">✨ 空白创作</button>
+      <button class="btn" onclick="App.createBookFromTemplate('love')">💕 情侣</button>
+      <button class="btn" onclick="App.createBookFromTemplate('friendship')">👯 闺蜜</button>
+      <button class="btn" onclick="App.createBookFromTemplate('gratitude')">🙏 感恩</button>
+      <button class="btn" onclick="App.createBookFromTemplate('travel')">✈️ 旅行</button>
+      <button class="btn" onclick="App.createBookFromTemplate('birthday')">🎂 生日</button>
+      <button class="btn" onclick="App.createBookFromTemplate('wedding')">💒 婚礼</button>
+      <button class="btn" onclick="App.createBookFromTemplate('baby')">👶 宝宝</button>
       <button class="btn" onclick="App.importBook()">📥 导入</button>
     `;
   },
