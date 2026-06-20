@@ -1472,15 +1472,15 @@ body {
 
 /* Book wrapper */
 .viewer-book-wrap {
-  perspective: 2200px;
+  perspective: 2400px;
   z-index: 1;
-  margin-top: 60px;
+  margin-top: 70px;
 }
 
 .viewer-book {
   position: relative;
-  width: 440px;
-  height: 580px;
+  width: 520px;
+  height: 680px;
   transform-style: preserve-3d;
   transform: rotateX(-2deg);
 }
@@ -1493,8 +1493,10 @@ body {
   border-radius: 3px var(--radius-md) var(--radius-md) 3px;
   transform-origin: left center;
   transform-style: preserve-3d;
-  transition: transform 0.8s cubic-bezier(0.42, 0, 0.58, 1);
+  backface-visibility: hidden;
+  transition: transform 0.9s cubic-bezier(0.22, 0.61, 0.36, 1);
   cursor: pointer;
+  z-index: 1;
   box-shadow:
     0 4px 16px rgba(0,0,0,0.5),
     0 12px 40px rgba(0,0,0,0.4);
@@ -1508,6 +1510,7 @@ body {
 
 .viewer-page.flipped {
   transform: rotateY(-180deg);
+  z-index: 0;
 }
 
 .viewer-page-front,
@@ -1689,8 +1692,8 @@ body {
   }
 
   .viewer-book {
-    width: 360px;
-    height: 480px;
+    width: 380px;
+    height: 500px;
   }
 
   .modal {
@@ -1750,8 +1753,8 @@ body {
   }
 
   .viewer-book {
-    width: 280px;
-    height: 380px;
+    width: 300px;
+    height: 400px;
   }
 
   .viewer-header {

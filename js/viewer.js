@@ -200,14 +200,14 @@ const Viewer = {
       if (el.rotation) { ctx.translate(x, y); ctx.rotate(el.rotation * Math.PI / 180); ctx.translate(-x, -y); }
 
       if (el.type === 'text') {
-        const fs = el.fontSize * (W / 440);
+        const fs = el.fontSize * (W / 520);
         ctx.font = `${fs}px ${el.fontFamily || 'serif'}`;
         ctx.fillStyle = el.color;
         ctx.textAlign = 'center';
         const lines = String(el.content).split('\n');
         lines.forEach((line, i) => ctx.fillText(line, x, y + i * fs * 1.5));
       } else if (el.type === 'sticker') {
-        const fs = (el.fontSize || 40) * (W / 440);
+        const fs = (el.fontSize || 40) * (W / 520);
         if (el.content?.startsWith('data:')) {
           await new Promise(resolve => {
             const img = new Image(); img.onload = () => { ctx.drawImage(img, x - fs/2, y - fs/2, fs, fs); resolve(); };
@@ -218,7 +218,7 @@ const Viewer = {
         }
       } else if (el.type === 'image') {
         await new Promise(resolve => {
-          const img = new Image(); img.onload = () => { ctx.drawImage(img, x, y, el.width * W/440, el.height * H/580); resolve(); };
+          const img = new Image(); img.onload = () => { ctx.drawImage(img, x, y, el.width * W/520, el.height * H/680); resolve(); };
           img.onerror = resolve; img.src = el.src;
         });
       }
