@@ -83,6 +83,67 @@ const Viewer = {
       if (e.key === 'ArrowLeft') this.prevPage();
       if (e.key === 'Escape') App.go('library');
     };
+
+    // 音频播放器
+    this.renderAudio();
+  },
+
+  /** 音频播放器 */
+  renderAudio() {
+    const existing = document.getElementById('viewer-audio-player');
+    if (existing) existing.remove();
+    this.audioEl = null;
+
+    if (!this.book.audio) return;
+
+    const container = document.createElement('div');
+    container.id = 'viewer-audio-player';
+    container.style.cssText = 'position:fixed;bottom:110px;right:30px;z-index:60;background:rgba(18,18,26,0.85);backdrop-filter:blur(12px);border:1px solid rgba(200,150,62,0.25);border-radius:40px;padding:8px 16px;display:flex;align-items:center;gap:10px;color:#F0EBE3;font-family:system-ui;font-size:13px;box-shadow:0 4px 20px rgba(0,0,0,0.5);';
+
+    const btn = document.createElement('button');
+    btn.textContent = '▶';
+    btn.style.cssText = 'width:32px;height:32px;border-radius:50%;border:1px solid rgba(200,150,62,0.3);background:rgba(200,150,62,0.15);color:#E8C97A;font-size:14px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;';
+    btn.onmouseenter = () => btn.style.background = 'rgba(200,150,62,0.3)';
+    btn.onmouseleave = () => btn.style.background = 'rgba(200,150,62,0.15)';
+
+    const info = document.createElement('span');
+    info.textContent = '🎵 ' + (this.book.audio.name || '背景音乐');
+    info.style.cssText = 'max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
+
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = '×';
+    closeBtn.style.cssText = 'background:none;border:none;color:#8B856E;cursor:pointer;font-size:16px;padding:2px;';
+    closeBtn.onclick = () => { this.stopAudio(); container.remove(); };
+
+    container.appendChild(btn);
+    container.appendChild(info);
+    container.appendChild(closeBtn);
+    document.getElementById('view-viewer').appendChild(container);
+
+    // 创建audio元素
+    const audio = new Audio();
+    audio.src = this.book.audio.type === 'dataUrl' ? this.book.audio.data : this.book.audio.data;
+    audio.loop = true;
+    audio.volume = 0.6;
+    this.audioEl = audio;
+
+    let playing = false;
+    btn.onclick = () => {
+      if (playing) { audio.pause(); btn.textContent = '▶'; }
+      else { audio.play().catch(() => App.toast('点击页面任意位置后音乐将开始')); btn.textContent = '⏸'; }
+      playing = !playing;
+    };
+
+    // 首次交互后自动播放
+    const autoPlay = () => {
+      audio.play().then(() => { playing = true; btn.textContent = '⏸'; }).catch(() => {});
+      document.removeEventListener('click', autoPlay);
+    };
+    document.addEventListener('click', autoPlay, { once: true });
+  },
+
+  stopAudio() {
+    if (this.audioEl) { this.audioEl.pause(); this.audioEl = null; }
   },
 
   pageBG(page) {

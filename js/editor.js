@@ -73,6 +73,8 @@ const Editor = {
     this.renderCanvas(page);
     // 属性面板
     this.renderProps(page);
+    // 更新音频按钮状态
+    this.updateAudioButton();
     // 注入主题动态CSS
     this.injectThemeCSS();
   },
@@ -104,6 +106,7 @@ const Editor = {
       <button class="btn btn-sm" onclick="Editor.addPage()">+ 添加页面</button>
       <button class="btn btn-sm" onclick="Editor.addElement('text')">文字</button>
       <button class="btn btn-sm" onclick="Editor.triggerImageUpload()">🖼 图片</button>
+      <button class="btn btn-sm" onclick="Editor.triggerAudioUpload()" id="btn-audio">🎵 音乐</button>
       <button class="btn btn-sm btn-primary" onclick="Editor.preview()">预览 →</button>
     `;
     document.getElementById('tb-title').onchange = (e) => {
@@ -295,6 +298,35 @@ const Editor = {
   handleImagePaste(e) {
     const items = e.clipboardData?.items; if(!items) return;
     for(const item of items) { if(item.type.startsWith('image/')) { const r=new FileReader(); r.onload=ev=>this.addImageElement(ev.target.result); r.readAsDataURL(item.getAsFile()); break; } }
+  },
+
+  /** 音频上传 */
+  triggerAudioUpload() {
+    const input = document.createElement('input'); input.type='file'; input.accept='audio/*';
+    input.onchange = e => { const f = e.target.files[0]; if(!f) return;
+      if(f.size > 5*1024*1024) { App.toast('音频文件不能超过5MB', true); return; }
+      const r=new FileReader(); r.onload=ev=>{ this.book.audio={type:'dataUrl',data:ev.target.result,name:f.name}; this.save(); this.updateAudioButton(); App.toast('背景音乐已添加：'+f.name); }; r.readAsDataURL(f);
+    };
+    input.click();
+  },
+  triggerAudioURL() {
+    const url = prompt('输入音频URL（支持mp3/wav/ogg在线地址）：', this.book.audio?.type==='url' ? this.book.audio.data : '');
+    if(!url) return;
+    this.book.audio = { type:'url', data:url, name:'在线音乐' };
+    this.save(); this.updateAudioButton(); App.toast('背景音乐链接已设置');
+  },
+  removeAudio() {
+    if(!this.book.audio) return;
+    if(confirm('确定移除背景音乐？')) {
+      this.book.audio = null;
+      this.save(); this.updateAudioButton(); App.toast('背景音乐已移除');
+    }
+  },
+  updateAudioButton() {
+    const btn = document.getElementById('btn-audio');
+    if(!btn) return;
+    if(this.book.audio) { btn.textContent = '🎵✓ 音乐'; btn.style.background='rgba(200,150,62,0.2)'; }
+    else { btn.textContent = '🎵 音乐'; btn.style.background=''; }
   },
 
   /** 图层控制 */
