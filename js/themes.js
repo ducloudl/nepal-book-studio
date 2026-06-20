@@ -205,6 +205,66 @@ const TEMPLATES = {
   }
 };
 
+/** 加载自定义主题（从localStorage） */
+function loadCustomThemes() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('nepal_custom_themes') || '{}');
+    Object.entries(saved).forEach(([key, data]) => {
+      THEMES[key] = data;
+    });
+  } catch(e) {}
+}
+
+/** 保存自定义主题 */
+function saveCustomTheme(key, data) {
+  try {
+    const saved = JSON.parse(localStorage.getItem('nepal_custom_themes') || '{}');
+    saved[key] = data;
+    localStorage.setItem('nepal_custom_themes', JSON.stringify(saved));
+    THEMES[key] = data;
+  } catch(e) { console.error('保存主题失败', e); }
+}
+
+/** 删除自定义主题 */
+function deleteCustomTheme(key) {
+  try {
+    const saved = JSON.parse(localStorage.getItem('nepal_custom_themes') || '{}');
+    delete saved[key];
+    localStorage.setItem('nepal_custom_themes', JSON.stringify(saved));
+    delete THEMES[key];
+  } catch(e) {}
+}
+
+/** 加载自定义贴纸 */
+function loadCustomStickers() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('nepal_custom_stickers') || '[]');
+    saved.forEach(s => STICKERS.push(s));
+  } catch(e) {}
+}
+
+/** 保存自定义贴纸 */
+function saveCustomSticker(dataUrl) {
+  try {
+    STICKERS.push(dataUrl);
+    const saved = JSON.parse(localStorage.getItem('nepal_custom_stickers') || '[]');
+    saved.push(dataUrl);
+    // 限制最多20个
+    if (saved.length > 20) saved.shift();
+    localStorage.setItem('nepal_custom_stickers', JSON.stringify(saved));
+  } catch(e) { console.error('保存贴纸失败', e); }
+}
+
+/** 构建主题CSS */
+function buildThemeCSS(bgColor1, bgColor2, direction) {
+  const dir = direction === 'vertical' ? '180deg' : direction === 'diagonal' ? '135deg' : '90deg';
+  return `linear-gradient(${dir}, ${bgColor1}, ${bgColor2})`;
+}
+
+// 启动时加载
+loadCustomThemes();
+loadCustomStickers();
+
 window.THEMES = THEMES;
 window.THEME_GLOBAL_CSS = THEME_GLOBAL_CSS;
 window.STICKERS = STICKERS;

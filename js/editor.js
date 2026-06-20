@@ -118,8 +118,8 @@ const Editor = {
   renderCanvas(page) {
     const canvas = document.getElementById('editor-canvas');
     const theme = THEMES[page.theme] || THEMES.moon;
-    canvas.style.background = theme.bg;
-    canvas.style.color = theme.textColor;
+    canvas.style.background = page.bgOverride || theme.bg;
+    canvas.style.color = page.textColorOverride || theme.textColor;
 
     // 元素
     let html = '<div class="texture-overlay"></div><div class="binding-line"></div>';
@@ -130,9 +130,10 @@ const Editor = {
           data-id="${el.id}" style="left:${el.x}%;top:${el.y}%;font-size:${el.fontSize}px;color:${el.color};font-family:${el.fontFamily};transform:rotate(${el.rotation||0}deg);z-index:${el.zIndex||1}"
           ><span class="el-content">${this.escHtml(el.content)}</span><div class="resize-handle"></div></div>`;
       } else if (el.type === 'sticker') {
+        const isDataUrl = el.content?.startsWith('data:');
         html += `<div class="canvas-element sticker-element ${el.id === this.selectedElId ? 'selected' : ''}${el.locked ? ' locked' : ''}"
           data-id="${el.id}" style="left:${el.x}%;top:${el.y}%;font-size:${el.fontSize||40}px;transform:rotate(${el.rotation||0}deg);z-index:${el.zIndex||1}${el.locked ? ';pointer-events:none' : ''}"
-          ><span class="el-content">${el.content}</span><div class="resize-handle"></div></div>`;
+          ><span class="el-content">${isDataUrl ? `<img src="${el.content}" style="max-width:120px;max-height:120px;object-fit:contain;pointer-events:none" draggable="false" />` : el.content}</span><div class="resize-handle"></div></div>`;
       } else if (el.type === 'image') {
         html += `<div class="canvas-element image-element ${el.id === this.selectedElId ? 'selected' : ''}${el.locked ? ' locked' : ''}"
           data-id="${el.id}" style="left:${el.x}%;top:${el.y}%;width:${el.width}px;height:${el.height}px;transform:rotate(${el.rotation||0}deg);z-index:${el.zIndex||1}${el.locked ? ';pointer-events:none' : ''}"
@@ -169,13 +170,20 @@ const Editor = {
     Object.entries(THEMES).forEach(([key, t]) => {
       html += `<div class="theme-btn ${page.theme === key ? 'active' : ''}" data-theme="${key}">${t.name}</div>`;
     });
+    html += `<div class="theme-btn" onclick="Editor.showCustomThemeCreator()" style="border-color:var(--color-accent);border-style:dashed;">+ 自定义</div>`;
     html += `</div></div>`;
+    // 颜色微调
+    html += `<div class="props-section"><h4>颜色微调</h4>
+      <div class="prop-row"><span class="prop-label" style="min-width:35px;">背景</span><input class="prop-color" type="color" id="page-bg-tweak" value="${theme.bg.includes('#') ? theme.bg.match(/#[0-9a-fA-F]{6}/)?.[0] || '#12121A' : '#12121A'}" onchange="Editor.tweakPageColor('bg', this.value)" /></div>
+      <div class="prop-row"><span class="prop-label" style="min-width:35px;">文字</span><input class="prop-color" type="color" id="page-text-tweak" value="${theme.textColor}" onchange="Editor.tweakPageColor('text', this.value)" /></div>
+    </div>`;
 
     // 贴纸库
     html += `<div class="props-section"><h4>添加贴纸</h4><div class="sticker-picker">`;
     STICKERS.forEach(s => {
       html += `<div class="sticker-btn" data-sticker="${s}">${s}</div>`;
     });
+    html += `<div class="sticker-btn" onclick="Editor.triggerCustomSticker()" style="border:1px dashed var(--color-accent);font-size:16px;">+</div>`;
     html += `</div></div>`;
 
     // 选中元素属性
@@ -327,6 +335,90 @@ const Editor = {
     if(!btn) return;
     if(this.book.audio) { btn.textContent = '🎵✓ 音乐'; btn.style.background='rgba(200,150,62,0.2)'; }
     else { btn.textContent = '🎵 音乐'; btn.style.background=''; }
+  },
+
+  /** 自定义主题创建器 */
+  showCustomThemeCreator() {
+    const html = `<div class="modal-overlay" onclick="this.remove()"><div class="modal" onclick="event.stopPropagation()" style="max-width:420px;">
+      <h2>🎨 创建自定义主题</h2>
+      <div class="prop-row"><span class="prop-label">名称</span><input class="prop-input" id="ct-name" placeholder="如: 海洋、落日..." maxlength="10" /></div>
+      <div class="prop-row"><span class="prop-label">颜色1</span><input class="prop-color" type="color" id="ct-c1" value="#1a1a3e" /></div>
+      <div class="prop-row"><span class="prop-label">颜色2</span><input class="prop-color" type="color" id="ct-c2" value="#3d3d7c" /></div>
+      <div class="prop-row"><span class="prop-label">文字色</span><input class="prop-color" type="color" id="ct-tc" value="#FFF8E1" /></div>
+      <div class="prop-row"><span class="prop-label">方向</span>
+        <select class="prop-input" id="ct-dir"><option value="vertical">上下</option><option value="horizontal">左右</option><option value="diagonal">对角</option></select>
+      </div>
+      <div id="ct-preview" style="height:80px;border-radius:8px;margin:12px 0;display:flex;align-items:center;justify-content:center;font-family:'Ma Shan Zheng';font-size:18px;color:#FFF8E1;background:linear-gradient(180deg,#1a1a3e,#3d3d7c)">预览效果</div>
+      <div class="modal-actions" style="justify-content:space-between;">
+        <button class="btn btn-sm btn-danger" onclick="Editor.deleteCustomThemeDialog()" id="ct-delete-btn" style="display:none;">🗑 删除</button>
+        <div><button class="btn" onclick="this.closest('.modal-overlay').remove()">取消</button>
+        <button class="btn btn-primary" onclick="Editor.saveCustomTheme()">保存主题</button></div>
+      </div>
+    </div></div>`;
+    document.body.insertAdjacentHTML('beforeend', html);
+    // 实时预览
+    setTimeout(() => {
+      const c1=document.getElementById('ct-c1'),c2=document.getElementById('ct-c2'),tc=document.getElementById('ct-tc'),dir=document.getElementById('ct-dir'),prev=document.getElementById('ct-preview');
+      const update = () => { prev.style.background = buildThemeCSS(c1.value,c2.value,dir.value); prev.style.color = tc.value; prev.textContent = document.getElementById('ct-name').value || '预览效果'; };
+      [c1,c2,tc,dir].forEach(el=>el.oninput=update);
+      document.getElementById('ct-name').oninput=update;
+    },100);
+  },
+
+  saveCustomTheme() {
+    const name = document.getElementById('ct-name').value.trim() || '自定义主题';
+    const c1 = document.getElementById('ct-c1').value;
+    const c2 = document.getElementById('ct-c2').value;
+    const tc = document.getElementById('ct-tc').value;
+    const dir = document.getElementById('ct-dir').value;
+    const key = 'custom_' + Date.now();
+    const theme = {
+      name: '⭐ ' + name,
+      bg: buildThemeCSS(c1, c2, dir),
+      textColor: tc,
+      accents: ['✨'],
+      decoHtml: '',
+      css: '',
+      custom: true
+    };
+    saveCustomTheme(key, theme);
+    document.querySelector('.modal-overlay').remove();
+    this.render();
+    App.toast('主题「'+name+'」已保存');
+  },
+
+  /** 颜色微调（临时改变当前页背景/文字色） */
+  tweakPageColor(prop, value) {
+    const page = this.book.pages[this.currentPageIdx];
+    const theme = THEMES[page.theme];
+    if (!theme) return;
+    if (prop === 'text') {
+      page.textColorOverride = value;
+      document.getElementById('editor-canvas').style.color = value;
+      page.elements.forEach(e => { if(e.type==='text' && !e.colorOverride) e.color = value; });
+    } else {
+      document.getElementById('editor-canvas').style.background = value;
+      page.bgOverride = value;
+    }
+    this.save();
+  },
+
+  /** 自定义贴纸上传 */
+  triggerCustomSticker() {
+    const input = document.createElement('input'); input.type='file'; input.accept='image/png,image/jpeg,image/gif,image/webp';
+    input.onchange = e => {
+      const f = e.target.files[0]; if(!f) return;
+      if(f.size > 500*1024) { App.toast('贴纸不能超过500KB', true); return; }
+      const r=new FileReader();
+      r.onload = ev => {
+        const dataUrl = ev.target.result;
+        saveCustomSticker(dataUrl);
+        this.addElement('sticker', dataUrl);
+        App.toast('贴纸已添加到库');
+      };
+      r.readAsDataURL(f);
+    };
+    input.click();
   },
 
   /** 图层控制 */

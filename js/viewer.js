@@ -149,7 +149,7 @@ const Viewer = {
   pageBG(page) {
     if (!page) return '';
     const theme = THEMES[page.theme] || THEMES.moon;
-    return `background:${theme.bg};color:${theme.textColor};`;
+    return `background:${page.bgOverride || theme.bg};color:${page.textColorOverride || theme.textColor};`;
   },
 
   pageContent(page) {
@@ -162,7 +162,10 @@ const Viewer = {
       if (el.type === 'text') {
         html += `<div class="viewer-element text-el" style="left:${el.x}%;top:${el.y}%;font-size:${el.fontSize}px;color:${el.color};font-family:${el.fontFamily};transform:rotate(${el.rotation||0}deg);z-index:${el.zIndex||1}">${this.escHtml(el.content)}</div>`;
       } else if (el.type === 'sticker') {
-        html += `<div class="viewer-element sticker-el" style="left:${el.x}%;top:${el.y}%;font-size:${el.fontSize||40}px;transform:rotate(${el.rotation||0}deg);z-index:${el.zIndex||1}">${el.content}</div>`;
+        const isDataUrl = el.content?.startsWith('data:');
+        html += `<div class="viewer-element sticker-el" style="left:${el.x}%;top:${el.y}%;font-size:${el.fontSize||40}px;transform:rotate(${el.rotation||0}deg);z-index:${el.zIndex||1}">${isDataUrl ? `<img src="${el.content}" style="max-width:120px;max-height:120px;object-fit:contain" />` : el.content}</div>`;
+      } else if (el.type === 'image') {
+        html += `<div class="viewer-element" style="left:${el.x}%;top:${el.y}%;width:${el.width}px;height:${el.height}px;transform:rotate(${el.rotation||0}deg);z-index:${el.zIndex||1}"><img src="${el.src}" style="width:100%;height:100%;object-fit:contain" /></div>`;
       }
     });
     return html;
